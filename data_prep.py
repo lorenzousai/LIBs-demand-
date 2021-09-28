@@ -140,10 +140,14 @@ def data_read_manipulation():
     PHEV_inflows_base_SSP2 = PHEV_inflows[PHEV_inflows['SocEc scen'].str.contains('SSP2', regex = False)]
     PHEV_inflows_base_SSP2 = PHEV_inflows_base_SSP2[PHEV_inflows_base_SSP2['ClimPol scen'].str.contains('Baseline', regex = False)]
 
+
+
+    ## Create array of dfs for easier looping and manipulation
+    # * BEVs
     BEVs_inflows_array = [BEV_inflows_RCP26_SSP2, BEV_inflows_RCP26_SSP1, BEV_inflows_RCP26_LED, 
         BEV_inflows_base_SSP2, BEV_inflows_base_SSP1, BEV_inflows_base_LED]
 
-        
+    # * PHEVs   
     PHEVs_inflows_array = [PHEV_inflows_RCP26_SSP2, PHEV_inflows_RCP26_SSP1, PHEV_inflows_RCP26_LED, 
         PHEV_inflows_base_SSP2, PHEV_inflows_base_SSP1, PHEV_inflows_base_LED]
 
@@ -153,14 +157,21 @@ def data_read_manipulation():
     chemistries = chemistries.set_index(['chemistry'])
     chemistries = chemistries.interpolate(method = 'linear',  axis = 1)
 
-    ### Read average battery size in each segment and forecasts for future battery size
+    ### Read average battery size in each segment and forecasts for future battery size for BEV
     # * Interpolate battery size for missing years
-    batt_size = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Batt_size', skiprows=2, nrows = 7, usecols = 'C:AW')
-    batt_size = batt_size.set_index("Segment")
-    batt_size = batt_size.interpolate(method = "linear", axis = 1)
-    batt_size = batt_size.round()
-    batt_size = batt_size.reset_index()
-    batt_size.drop('Segment', inplace = True, axis = 1)
+    batt_size_BEV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Batt_size', skiprows=2, nrows = 7, usecols = 'C:AW')
+    batt_size_BEV = batt_size_BEV.set_index("Segment")
+    batt_size_BEV = batt_size_BEV.interpolate(method = "linear", axis = 1)
+    batt_size_BEV = batt_size_BEV.round()
+    batt_size_BEV = batt_size_BEV.reset_index()
+    batt_size_BEV.drop('Segment', inplace = True, axis = 1)
+
+
+    ## Do a similar thing for PHEVs, but in this case we assume the battery size remains constant over time 
+    batt_size_PHEV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'BEV_data', skiprows=20, nrows = 7, usecols = 'B:C')
+    batt_size_PHEV = batt_size_PHEV.set_index("Segment")
+    batt_size_PHEV = batt_size_PHEV.reset_index()
+    batt_size_PHEV.drop('Segment', inplace = True, axis = 1)
     
     ### Read material loading in kg/kwh for each chemistry analysed and prepare df
     material = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Material composition', skiprows=1, nrows = 8, usecols = 'B:M')
@@ -207,18 +218,29 @@ def data_read_manipulation():
     materials_rep = pd.concat([material]*(len(chemistries.index)-1))
     materials_rep.index = segments_chemistries_materials_index
     materials_rep.columns = [2015]
-    materials_rep = materials_rep.reindex(columns = batt_size.columns, method = 'ffill')
+    materials_rep = materials_rep.reindex(columns = batt_size_BEV.columns, method = 'ffill')
 
     # * Create dataframes with capacity of battery in each segment and for each chemistry 
     # * Assumed the same battery capacity for each chemistry within the segment
     # * Create another dataframe with material content in battery within segment
     # * Material content in battery pack grows over time as battery capacity grows yearly
-    capacity_segmented = batt_size.reindex(chem_index, level = 0)
-    material_content = batt_size.reindex(segments_chemistries_materials_index, level = 0).mul(materials_rep)
+    capacity_segmented_BEV = batt_size_BEV.reindex(chem_index, level = 0)
+    capacity_segmented_PHEV = batt_size_PHEV.reindex(chem_index, level = 0)
+    material_content = batt_size_BEV.reindex(segments_chemistries_materials_index, level = 0).mul(materials_rep)
+
+    ##### Calculate yearly EV capacity additions and store it in a new set of dfs.
+    BEV_capacity_additions_yearly_array =  BEV_split_chem_array
+    PHEV_capacity_additions_yearly_array = PHEV_split_chem_array
+
+    ## Actual calculation
+    for i in range(len(BEV_capacity_additions_yearly_array)):
+        BEV_capacity_additions_yearly_array[i] = capacity_segmented_BEV.values * BEV_capacity_additions_yearly_array[i]
+        PHEV_capacity_additions_yearly_array[i] = capacity_segmented_PHEV.values * PHEV_capacity_additions_yearly_array[i]
 
 
 
-    return capacity_segmented
+    return PHEV_capacity_additions_yearly_array[0].head(5)
+
 
 
 # %%
