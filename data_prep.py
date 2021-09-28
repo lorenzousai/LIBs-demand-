@@ -162,16 +162,25 @@ def data_read_manipulation():
     batt_size = batt_size.reset_index()
     batt_size.drop('Segment', inplace = True, axis = 1)
     
-    ### Read material loading in kg/kwh for each chemistry analysed
+    ### Read material loading in kg/kwh for each chemistry analysed and prepare df
     material = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Material composition', skiprows=1, nrows = 8, usecols = 'B:M')
     material = material.set_index(['chemistry'])
-    material = material.transpose()
+    
 
     ### Prepare multiindex to be used for each BEV and PHEV inflow df
     segments_index = stock_additions_segmented(share_df, BEVs_inflows_array[0])
     
     chem_index = pd.MultiIndex.from_product([segments_index.index.to_list(),
         chemistries.index.to_list()])
+
+    segments_chemistries_materials_index = pd.MultiIndex.from_product([segments_index.index.to_list(),
+    chemistries.index.to_list(), 
+    material.transpose().index.to_list()])   
+
+    material = material.stack()
+    material = material.to_frame()
+    material.index.names = ['','']
+    material.columns = ['']
 
 ## For loop steps: 
     # * Break down inflows by segment;
@@ -194,11 +203,22 @@ def data_read_manipulation():
         PHEV_split_chem_array[i] = PHEVs_inflows_array[i].reindex(chem_index, level = 0)
         PHEV_split_chem_array[i] = PHEV_split_chem_array[i].multiply(chemistries, level = 1) 
 
-    segments_chemistries_materials_index = pd.MultiIndex.from_product([segments_index.index.to_list(),
-    chemistries.index.to_list(), 
-    material.index.to_list()])
+    # * Crate dataframe with materials loading in kg/kWh for all the chemistries and for all years
+    materials_rep = pd.concat([material]*(len(chemistries.index)-1))
+    materials_rep.index = segments_chemistries_materials_index
+    materials_rep.columns = [2015]
+    materials_rep = materials_rep.reindex(columns = batt_size.columns, method = 'ffill')
 
-    return BEV_split_chem_array[1]
+    # * Create dataframes with capacity of battery in each segment and for each chemistry 
+    # * Assumed the same battery capacity for each chemistry within the segment
+    # * Create another dataframe with material content in battery within segment
+    # * Material content in battery pack grows over time as battery capacity grows yearly
+    capacity_segmented = batt_size.reindex(chem_index, level = 0)
+    material_content = batt_size.reindex(segments_chemistries_materials_index, level = 0).mul(materials_rep)
+
+
+
+    return capacity_segmented
 
 
 # %%
