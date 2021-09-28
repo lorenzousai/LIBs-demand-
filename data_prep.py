@@ -290,9 +290,73 @@ def data_read_manipulation():
 #This section is over  with the calculation of the yearly material and capacity additions
 #Next is the calculation of the outflows   
 
-#%% 
+########################## Outflows #######################################
+    mu = 11 #average lifetime of vehicles in EU
+    sigma = 3 
+    x = np.linspace(1, 25, 25)
+    
+    probability = pd.DataFrame(stats.norm.pdf(x, mu, sigma))
+    probability = probability.reset_index()
+    probability['index'] = probability['index'] + 1 
+    probability = probability.set_index('index')
+    probability.columns['share']
 
-################### 
+    years_index = BEV_material_additions_yearly_array[0].columns
+
+
+    #! Create empty dataframes. This is not the best way perhaps. 
+    empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
+
+    cap_eol_PHEV_base_SSP2 = empty_df
+    cap_eol_PHEV_base_SSP1 = empty_df
+    cap_eol_PHEV_RCP26_SSP2 = empty_df
+    cap_eol_PHEV_RCP26_SSP1 = empty_df
+    cap_eol_PHEV_base_LED = empty_df
+    cap_eol_PHEV_RCP26_LED = empty_df
+
+    cap_eol_BEV_base_SSP2 = empty_df
+    cap_eol_BEV_base_SSP1 = empty_df
+    cap_eol_BEV_RCP26_SSP2 = empty_df
+    cap_eol_BEV_RCP26_SSP1 = empty_df
+    cap_eol_BEV_base_LED = empty_df
+    cap_eol_BEV_RCP26_LED = empty_df
+
+    for col in cap_eol_PHEV_base_SSP2.columns:
+        cap_eol_PHEV_base_SSP2[col].values[:] = 0
+        cap_eol_PHEV_base_SSP1[col].values[:] = 0
+        cap_eol_PHEV_RCP26_SSP2[col].values[:] = 0
+        cap_eol_PHEV_RCP26_SSP1[col].values[:] = 0
+        cap_eol_PHEV_base_LED[col].values[:] = 0
+        cap_eol_PHEV_RCP26_LED[col].values[:] = 0
+
+        cap_eol_BEV_base_SSP2[col].values[:] = 0
+        cap_eol_BEV_base_SSP1[col].values[:] = 0
+        cap_eol_BEV_RCP26_SSP2[col].values[:] = 0
+        cap_eol_BEV_RCP26_SSP1[col].values[:] = 0
+        cap_eol_BEV_base_LED[col].values[:] = 0
+        cap_eol_BEV_RCP26_LED[col].values[:] = 0
+
+    capacity_BEV_eol_array = [
+        cap_eol_BEV_base_SSP2,
+        cap_eol_BEV_base_SSP1,
+        cap_eol_BEV_RCP26_SSP2,
+        cap_eol_BEV_RCP26_SSP1,
+        cap_eol_BEV_base_LED,
+        cap_eol_BEV_RCP26_LED
+        ]
+
+    capacity_PHEV_eol_array = [
+        cap_eol_PHEV_base_SSP2,
+        cap_eol_PHEV_base_SSP1,
+        cap_eol_PHEV_RCP26_SSP2,
+        cap_eol_PHEV_RCP26_SSP1,
+        cap_eol_PHEV_base_LED,
+        cap_eol_PHEV_RCP26_LED
+        ]
+
+
+    for n in range(len(years_index)):
+        
 
 
 
@@ -301,8 +365,7 @@ def data_read_manipulation():
 
 
 
-    return PHEV_material_additions_yearly_array[0]
-
+    return probability
 
 # %%
 data_read_manipulation()
