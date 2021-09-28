@@ -154,10 +154,13 @@ def data_read_manipulation():
     chemistries = chemistries.interpolate(method = 'linear',  axis = 1)
 
     ### Read average battery size in each segment and forecasts for future battery size
+    # * Interpolate battery size for missing years
     batt_size = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Batt_size', skiprows=2, nrows = 7, usecols = 'C:AW')
     batt_size = batt_size.set_index("Segment")
     batt_size = batt_size.interpolate(method = "linear", axis = 1)
     batt_size = batt_size.round()
+    batt_size = batt_size.reset_index()
+    batt_size.drop('Segment', inplace = True, axis = 1)
     
     ### Read material loading in kg/kwh for each chemistry analysed
     material = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Material composition', skiprows=1, nrows = 8, usecols = 'B:M')
@@ -174,6 +177,7 @@ def data_read_manipulation():
     # * Break down inflows by segment;
     # * convert inflows to units (from million units)
     # * Reindex dataframe to have chemistries as level 0
+    # * multiply EVs inflows segmented with chemistries market share in each year
 
     BEV_split_chem_array = [None]*len(BEVs_inflows_array)
     PHEV_split_chem_array = [None]*len(PHEVs_inflows_array)
@@ -190,6 +194,9 @@ def data_read_manipulation():
         PHEV_split_chem_array[i] = PHEVs_inflows_array[i].reindex(chem_index, level = 0)
         PHEV_split_chem_array[i] = PHEV_split_chem_array[i].multiply(chemistries, level = 1) 
 
+    segments_chemistries_materials_index = pd.MultiIndex.from_product([segments_index.index.to_list(),
+    chemistries.index.to_list(), 
+    material.index.to_list()])
 
     return BEV_split_chem_array[1]
 
