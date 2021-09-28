@@ -5,6 +5,7 @@ import numpy as np
 import math
 import pandas as pd
 from scipy.interpolate import make_interp_spline, BSpline
+import copy
 
 
 # %%
@@ -57,7 +58,7 @@ def calculate_eol(index, years_array, start_year, prob_data, stock_add_df):
    
     testing_testing = pd.concat([stock_add_df[start_year]]*25, axis = 1)
     
-    testing_testing.columns =  pd.Index(np.arange(start_year, start_year+25))
+    testing_testing.columns = pd.Index(np.arange(start_year, start_year+25))
     
     eol = testing_testing.mul(prob_data)
     return(eol)
@@ -235,8 +236,8 @@ def data_read_manipulation():
 
 ########################## CAPACITY #######################################
     ##### Calculate yearly EV capacity additions and store it in a new set of dfs.
-    BEV_capacity_additions_yearly_array =  BEV_split_chem_array
-    PHEV_capacity_additions_yearly_array = PHEV_split_chem_array
+    BEV_capacity_additions_yearly_array =  copy.deepcopy(BEV_split_chem_array)
+    PHEV_capacity_additions_yearly_array = copy.deepcopy(PHEV_split_chem_array)
 
     ## Actual calculation
     for i in range(len(BEV_capacity_additions_yearly_array)):
@@ -261,8 +262,8 @@ def data_read_manipulation():
 
 ########################## MATERIALS #######################################
     # * Calculate material additions in a similar fashion as the capacity additions
-    BEV_material_additions_yearly_array =  BEV_split_chem_array
-    PHEV_material_additions_yearly_array = PHEV_split_chem_array
+    BEV_material_additions_yearly_array =  copy.deepcopy(BEV_split_chem_array)
+    PHEV_material_additions_yearly_array = copy.deepcopy(PHEV_split_chem_array)
 
     ## Actual calculation
     for i in range(len(BEV_material_additions_yearly_array)):
@@ -298,17 +299,16 @@ def data_read_manipulation():
     probability = pd.DataFrame(stats.norm.pdf(x, mu, sigma))
     probability = probability.reset_index()
     probability['index'] = probability['index'] + 1 
-    probability = probability.set_index('index')
-    probability.columns = ['2015']
-
+    #probability = probability.set_index('index')
+    probability.columns = ['',2015]
+    probability = probability.set_index('')
     years_index = BEV_material_additions_yearly_array[0].columns
-
+    
 
     #! Create empty dataframes. This is not the best way perhaps. 
-    #empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
-    return BEV_split_chem_array[0]
+    empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
 
-#%%
+
     cap_eol_PHEV_base_SSP2 = empty_df
     cap_eol_PHEV_base_SSP1 = empty_df
     cap_eol_PHEV_RCP26_SSP2 = empty_df
@@ -377,15 +377,12 @@ def data_read_manipulation():
                 capacity_PHEV_eol_array[i]
                 )
             
-            total_eol_BEV_cap = capacity_BEV_eol_array[i].add(capacity_BEV_eol_array[i], fill_value = 0)
-            total_eol_PHEV_cap = capacity_PHEV_eol_array[i].add(capacity_PHEV_eol_array[i], fill_value = 0)
+            total_eol_BEV_cap[i] = capacity_BEV_eol_array[i].add(capacity_BEV_eol_array[i], fill_value = 0)
+            total_eol_PHEV_cap[i] = capacity_PHEV_eol_array[i].add(capacity_PHEV_eol_array[i], fill_value = 0)
         
 
 
-
-
-
-    return probability
+    return total_eol_BEV_cap
 
 # %%
 data_read_manipulation()
