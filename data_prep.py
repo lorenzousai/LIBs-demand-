@@ -172,6 +172,7 @@ def data_read_manipulation():
     batt_size_PHEV = batt_size_PHEV.set_index("Segment")
     batt_size_PHEV = batt_size_PHEV.reset_index()
     batt_size_PHEV.drop('Segment', inplace = True, axis = 1)
+    batt_size_PHEV.columns = [2015]
     
     ### Read material loading in kg/kwh for each chemistry analysed and prepare df
     material = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Material composition', skiprows=1, nrows = 8, usecols = 'B:M')
@@ -217,7 +218,10 @@ def data_read_manipulation():
     # * Crate dataframe with materials loading in kg/kWh for all the chemistries and for all years
     materials_rep = pd.concat([material]*(len(chemistries.index)-1))
     materials_rep.index = segments_chemistries_materials_index
+    materials_rep_PHEV = materials_rep
     materials_rep.columns = [2015]
+    
+    #materials_rep_PHEV = materials_rep_PHEV.reindex(columns = batt_size_BEV.columns, method = 'ffill')
     materials_rep = materials_rep.reindex(columns = batt_size_BEV.columns, method = 'ffill')
 
     # * Create dataframes with capacity of battery in each segment and for each chemistry 
@@ -226,8 +230,10 @@ def data_read_manipulation():
     # * Material content in battery pack grows over time as battery capacity grows yearly
     capacity_segmented_BEV = batt_size_BEV.reindex(chem_index, level = 0)
     capacity_segmented_PHEV = batt_size_PHEV.reindex(chem_index, level = 0)
-    material_content = batt_size_BEV.reindex(segments_chemistries_materials_index, level = 0).mul(materials_rep)
+    material_content_BEV = batt_size_BEV.reindex(segments_chemistries_materials_index, level = 0).mul(materials_rep)
+    material_content_PHEV = batt_size_PHEV.reindex(segments_chemistries_materials_index, level = 0).mul(materials_rep_PHEV)
 
+########################## CAPACITY #######################################
     ##### Calculate yearly EV capacity additions and store it in a new set of dfs.
     BEV_capacity_additions_yearly_array =  BEV_split_chem_array
     PHEV_capacity_additions_yearly_array = PHEV_split_chem_array
@@ -237,10 +243,53 @@ def data_read_manipulation():
         BEV_capacity_additions_yearly_array[i] = capacity_segmented_BEV.values * BEV_capacity_additions_yearly_array[i]
         PHEV_capacity_additions_yearly_array[i] = capacity_segmented_PHEV.values * PHEV_capacity_additions_yearly_array[i]
 
+        ## Rename index of dfs
+        BEV_capacity_additions_yearly_array[i] = (
+            BEV_capacity_additions_yearly_array[i]
+            .reset_index()
+            .rename(columns={'level_0': 'segment', 'level_1': 'chemistry' }) 
+            .set_index(['segment','chemistry'])
+        )
+
+        PHEV_capacity_additions_yearly_array[i] = (
+            PHEV_capacity_additions_yearly_array[i]
+            .reset_index()
+            .rename(columns={'level_0': 'segment', 'level_1': 'chemistry' })
+            .set_index(['segment','chemistry'])
+        )
+        
+
+########################## MATERIALS #######################################
+    # * Calculate material additions in a similar fashion as the capacity additions
+    BEV_material_additions_yearly_array =  BEV_split_chem_array
+    PHEV_material_additions_yearly_array = PHEV_split_chem_array
+
+    ## Actual calculation
+    for i in range(len(BEV_material_additions_yearly_array)):
+        BEV_material_additions_yearly_array[i] =  BEV_material_additions_yearly_array[i].reindex(segments_chemistries_materials_index)
+        PHEV_material_additions_yearly_array[i] = PHEV_material_additions_yearly_array[i].reindex(segments_chemistries_materials_index)    
 
 
-    return PHEV_capacity_additions_yearly_array[0].head(5)
 
+        BEV_material_additions_yearly_array[i] = material_content_BEV.values * BEV_material_additions_yearly_array[i]
+        PHEV_material_additions_yearly_array[i] = material_content_PHEV.values * PHEV_material_additions_yearly_array[i]
+
+        ## Rename index of dfs
+        BEV_material_additions_yearly_array[i] = (
+            BEV_material_additions_yearly_array[i]
+            .reset_index()
+            .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
+            .set_index(['segment','chemistry','material'])
+        )
+
+        PHEV_material_additions_yearly_array[i] = (
+            PHEV_material_additions_yearly_array[i]
+            .reset_index()
+            .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
+            .set_index(['segment','chemistry','material'])
+        )
+
+    return PHEV_material_additions_yearly_array[0]
 
 
 # %%
