@@ -269,8 +269,6 @@ def data_read_manipulation():
         BEV_material_additions_yearly_array[i] =  BEV_material_additions_yearly_array[i].reindex(segments_chemistries_materials_index)
         PHEV_material_additions_yearly_array[i] = PHEV_material_additions_yearly_array[i].reindex(segments_chemistries_materials_index)    
 
-
-
         BEV_material_additions_yearly_array[i] = material_content_BEV.values * BEV_material_additions_yearly_array[i]
         PHEV_material_additions_yearly_array[i] = material_content_PHEV.values * PHEV_material_additions_yearly_array[i]
 
@@ -288,6 +286,20 @@ def data_read_manipulation():
             .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
             .set_index(['segment','chemistry','material'])
         )
+
+#This section is over  with the calculation of the yearly material and capacity additions
+#Next is the calculation of the outflows   
+
+#%% 
+
+################### 
+
+
+
+
+
+
+
 
     return PHEV_material_additions_yearly_array[0]
 
