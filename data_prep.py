@@ -299,14 +299,16 @@ def data_read_manipulation():
     probability = probability.reset_index()
     probability['index'] = probability['index'] + 1 
     probability = probability.set_index('index')
-    probability.columns['share']
+    probability.columns = ['2015']
 
     years_index = BEV_material_additions_yearly_array[0].columns
 
 
     #! Create empty dataframes. This is not the best way perhaps. 
-    empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
+    #empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
+    return BEV_split_chem_array[0]
 
+#%%
     cap_eol_PHEV_base_SSP2 = empty_df
     cap_eol_PHEV_base_SSP1 = empty_df
     cap_eol_PHEV_RCP26_SSP2 = empty_df
@@ -354,12 +356,30 @@ def data_read_manipulation():
         cap_eol_PHEV_RCP26_LED
         ]
 
+    total_eol_BEV_cap = [None]*len(capacity_PHEV_eol_array)
+    total_eol_PHEV_cap = [None]*len(capacity_PHEV_eol_array)
 
     for n in range(len(years_index)):
+        for i in range(len(capacity_BEV_eol_array)):
+            capacity_BEV_eol_array[i] = calculate_eol( 
+                chem_index,
+                years_index,
+                years_index[n], 
+                probability,
+                capacity_BEV_eol_array[i]
+                )
+                    
+            capacity_PHEV_eol_array[i] = calculate_eol( 
+                chem_index,
+                years_index,
+                years_index[n], 
+                probability,
+                capacity_PHEV_eol_array[i]
+                )
+            
+            total_eol_BEV_cap = capacity_BEV_eol_array[i].add(capacity_BEV_eol_array[i], fill_value = 0)
+            total_eol_PHEV_cap = capacity_PHEV_eol_array[i].add(capacity_PHEV_eol_array[i], fill_value = 0)
         
-
-
-
 
 
 
