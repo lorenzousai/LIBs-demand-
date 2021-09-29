@@ -366,7 +366,7 @@ def data_read_manipulation():
             eol_base_BEV[i] =  calculate_eol(chem_index, years_index, years_index[n], probability, BEV_capacity_additions_yearly_list[i])
             capacity_BEV_eol_list[i] = capacity_BEV_eol_list[i].add(eol_base_BEV[i], fill_value = 0)
             eol_base_PHEV[i] = calculate_eol(chem_index, years_index, years_index[n], probability, PHEV_capacity_additions_yearly_list[i])
-            capacity_BEV_eol_list[i] = capacity_BEV_eol_list[i].add(eol_base_PHEV[i], fill_value = 0) 
+            capacity_PHEV_eol_list[i] = capacity_PHEV_eol_list[i].add(eol_base_PHEV[i], fill_value = 0) 
         
 
 ########################## Calculate retired capacity (in kg) #######################################
@@ -374,12 +374,18 @@ def data_read_manipulation():
     material_BEV_eol_list = capacity_BEV_eol_list.copy()
     material_PHEV_eol_list = capacity_PHEV_eol_list.copy()
 
+    materials_rep_BEV_eol = materials_rep.reindex(columns = material_BEV_eol_list[0].columns,
+        method = 'ffill')
+    materials_rep_PHEV_eol = materials_rep_PHEV.reindex(columns = material_PHEV_eol_list[0].columns, 
+        method = 'ffill')
+
+
     for i in range(len(material_BEV_eol_list)):
         material_BEV_eol_list[i] = material_BEV_eol_list[i].reindex(segments_chemistries_materials_index)
         material_PHEV_eol_list[i] = material_PHEV_eol_list[i].reindex(segments_chemistries_materials_index)    
 
-        #material_BEV_eol_list[i] = material_content_BEV.values * material_BEV_eol_list[i]
-        #material_PHEV_eol_list[i] = material_content_PHEV.values * material_PHEV_eol_list[i]
+        material_BEV_eol_list[i] = materials_rep_BEV_eol.values * material_BEV_eol_list[i]
+        material_PHEV_eol_list[i] = materials_rep_PHEV_eol.values * material_PHEV_eol_list[i]
 
     
 
