@@ -44,7 +44,7 @@ def stock_additions_segmented (share_segments, raw_vehicle_stock):
     return(stock_segmented)
 
 
-def calculate_eol(index, years_array, start_year, prob_data, stock_add_df):
+def calculate_eol(index, years_list, start_year, prob_data, stock_add_df):
    
     
     ## Trying to calculate eol for all the years
@@ -145,11 +145,11 @@ def data_read_manipulation():
 
     ## Create array of dfs for easier looping and manipulation
     # * BEVs
-    BEVs_inflows_array = [BEV_inflows_RCP26_SSP2, BEV_inflows_RCP26_SSP1, BEV_inflows_RCP26_LED, 
+    BEVs_inflows_list = [BEV_inflows_RCP26_SSP2, BEV_inflows_RCP26_SSP1, BEV_inflows_RCP26_LED, 
         BEV_inflows_base_SSP2, BEV_inflows_base_SSP1, BEV_inflows_base_LED]
 
     # * PHEVs   
-    PHEVs_inflows_array = [PHEV_inflows_RCP26_SSP2, PHEV_inflows_RCP26_SSP1, PHEV_inflows_RCP26_LED, 
+    PHEVs_inflows_list = [PHEV_inflows_RCP26_SSP2, PHEV_inflows_RCP26_SSP1, PHEV_inflows_RCP26_LED, 
         PHEV_inflows_base_SSP2, PHEV_inflows_base_SSP1, PHEV_inflows_base_LED]
 
     
@@ -181,7 +181,7 @@ def data_read_manipulation():
     
 
     ### Prepare multiindex to be used for each BEV and PHEV inflow df
-    segments_index = stock_additions_segmented(share_df, BEVs_inflows_array[0])
+    segments_index = stock_additions_segmented(share_df, BEVs_inflows_list[0])
     
     chem_index = pd.MultiIndex.from_product([segments_index.index.to_list(),
         chemistries.index.to_list()])
@@ -201,20 +201,20 @@ def data_read_manipulation():
     # * Reindex dataframe to have chemistries as level 0
     # * multiply EVs inflows segmented with chemistries market share in each year
 
-    BEV_split_chem_array = [None]*len(BEVs_inflows_array)
-    PHEV_split_chem_array = [None]*len(PHEVs_inflows_array)
+    BEV_split_chem_list = [None]*len(BEVs_inflows_list)
+    PHEV_split_chem_list = [None]*len(PHEVs_inflows_list)
 
-    for i in range(len(BEVs_inflows_array)):
-        BEVs_inflows_array[i] = stock_additions_segmented(share_df, BEVs_inflows_array[i])
-        BEVs_inflows_array[i] = BEVs_inflows_array[i].multiply(1e6).round()
-        BEV_split_chem_array[i] = BEVs_inflows_array[i].reindex(chem_index, level = 0)
-        BEV_split_chem_array[i] = BEV_split_chem_array[i].multiply(chemistries, level = 1)
+    for i in range(len(BEVs_inflows_list)):
+        BEVs_inflows_list[i] = stock_additions_segmented(share_df, BEVs_inflows_list[i])
+        BEVs_inflows_list[i] = BEVs_inflows_list[i].multiply(1e6).round()
+        BEV_split_chem_list[i] = BEVs_inflows_list[i].reindex(chem_index, level = 0)
+        BEV_split_chem_list[i] = BEV_split_chem_list[i].multiply(chemistries, level = 1)
 
-    for i in range(len(PHEVs_inflows_array)):
-        PHEVs_inflows_array[i] = stock_additions_segmented(share_df, PHEVs_inflows_array[i])
-        PHEVs_inflows_array[i] = PHEVs_inflows_array[i].multiply(1e6)
-        PHEV_split_chem_array[i] = PHEVs_inflows_array[i].reindex(chem_index, level = 0)
-        PHEV_split_chem_array[i] = PHEV_split_chem_array[i].multiply(chemistries, level = 1) 
+    for i in range(len(PHEVs_inflows_list)):
+        PHEVs_inflows_list[i] = stock_additions_segmented(share_df, PHEVs_inflows_list[i])
+        PHEVs_inflows_list[i] = PHEVs_inflows_list[i].multiply(1e6)
+        PHEV_split_chem_list[i] = PHEVs_inflows_list[i].reindex(chem_index, level = 0)
+        PHEV_split_chem_list[i] = PHEV_split_chem_list[i].multiply(chemistries, level = 1) 
 
     # * Crate dataframe with materials loading in kg/kWh for all the chemistries and for all years
     materials_rep = pd.concat([material]*(len(chemistries.index)-1))
@@ -236,24 +236,24 @@ def data_read_manipulation():
 
 ########################## CAPACITY #######################################
     ##### Calculate yearly EV capacity additions and store it in a new set of dfs.
-    BEV_capacity_additions_yearly_array =  copy.deepcopy(BEV_split_chem_array)
-    PHEV_capacity_additions_yearly_array = copy.deepcopy(PHEV_split_chem_array)
+    BEV_capacity_additions_yearly_list =  BEV_split_chem_list.copy()
+    PHEV_capacity_additions_yearly_list = PHEV_split_chem_list.copy()
 
     ## Actual calculation
-    for i in range(len(BEV_capacity_additions_yearly_array)):
-        BEV_capacity_additions_yearly_array[i] = capacity_segmented_BEV.values * BEV_capacity_additions_yearly_array[i]
-        PHEV_capacity_additions_yearly_array[i] = capacity_segmented_PHEV.values * PHEV_capacity_additions_yearly_array[i]
+    for i in range(len(BEV_capacity_additions_yearly_list)):
+        BEV_capacity_additions_yearly_list[i] = capacity_segmented_BEV.values * BEV_capacity_additions_yearly_list[i]
+        PHEV_capacity_additions_yearly_list[i] = capacity_segmented_PHEV.values * PHEV_capacity_additions_yearly_list[i]
 
         ## Rename index of dfs
-        BEV_capacity_additions_yearly_array[i] = (
-            BEV_capacity_additions_yearly_array[i]
+        BEV_capacity_additions_yearly_list[i] = (
+            BEV_capacity_additions_yearly_list[i]
             .reset_index()
             .rename(columns={'level_0': 'segment', 'level_1': 'chemistry' }) 
             .set_index(['segment','chemistry'])
         )
 
-        PHEV_capacity_additions_yearly_array[i] = (
-            PHEV_capacity_additions_yearly_array[i]
+        PHEV_capacity_additions_yearly_list[i] = (
+            PHEV_capacity_additions_yearly_list[i]
             .reset_index()
             .rename(columns={'level_0': 'segment', 'level_1': 'chemistry' })
             .set_index(['segment','chemistry'])
@@ -262,27 +262,27 @@ def data_read_manipulation():
 
 ########################## MATERIALS #######################################
     # * Calculate material additions in a similar fashion as the capacity additions
-    BEV_material_additions_yearly_array =  copy.deepcopy(BEV_split_chem_array)
-    PHEV_material_additions_yearly_array = copy.deepcopy(PHEV_split_chem_array)
+    BEV_material_additions_yearly_list =  BEV_split_chem_list.copy()
+    PHEV_material_additions_yearly_list = PHEV_split_chem_list.copy()
 
     ## Actual calculation
-    for i in range(len(BEV_material_additions_yearly_array)):
-        BEV_material_additions_yearly_array[i] =  BEV_material_additions_yearly_array[i].reindex(segments_chemistries_materials_index)
-        PHEV_material_additions_yearly_array[i] = PHEV_material_additions_yearly_array[i].reindex(segments_chemistries_materials_index)    
+    for i in range(len(BEV_material_additions_yearly_list)):
+        BEV_material_additions_yearly_list[i] =  BEV_material_additions_yearly_list[i].reindex(segments_chemistries_materials_index)
+        PHEV_material_additions_yearly_list[i] = PHEV_material_additions_yearly_list[i].reindex(segments_chemistries_materials_index)    
 
-        BEV_material_additions_yearly_array[i] = material_content_BEV.values * BEV_material_additions_yearly_array[i]
-        PHEV_material_additions_yearly_array[i] = material_content_PHEV.values * PHEV_material_additions_yearly_array[i]
+        BEV_material_additions_yearly_list[i] = material_content_BEV.values * BEV_material_additions_yearly_list[i]
+        PHEV_material_additions_yearly_list[i] = material_content_PHEV.values * PHEV_material_additions_yearly_list[i]
 
         ## Rename index of dfs
-        BEV_material_additions_yearly_array[i] = (
-            BEV_material_additions_yearly_array[i]
+        BEV_material_additions_yearly_list[i] = (
+            BEV_material_additions_yearly_list[i]
             .reset_index()
             .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
             .set_index(['segment','chemistry','material'])
         )
 
-        PHEV_material_additions_yearly_array[i] = (
-            PHEV_material_additions_yearly_array[i]
+        PHEV_material_additions_yearly_list[i] = (
+            PHEV_material_additions_yearly_list[i]
             .reset_index()
             .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
             .set_index(['segment','chemistry','material'])
@@ -302,26 +302,28 @@ def data_read_manipulation():
     #probability = probability.set_index('index')
     probability.columns = ['',2015]
     probability = probability.set_index('')
-    years_index = BEV_material_additions_yearly_array[0].columns
+    years_index = BEV_material_additions_yearly_list[0].columns
     
 
     #! Create empty dataframes. This is not the best way perhaps. 
-    empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
+    empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_list[0])
 
 
-    cap_eol_PHEV_base_SSP2 = copy(empty_df)
-    cap_eol_PHEV_base_SSP1 = copy(empty_df)
-    cap_eol_PHEV_RCP26_SSP2 = copy(empty_df)
-    cap_eol_PHEV_RCP26_SSP1 = copy(empty_df)
-    cap_eol_PHEV_base_LED = copy(empty_df)
-    cap_eol_PHEV_RCP26_LED = copy(empty_df)
+########################## Calculate retired capacity (in kWh) #######################################
 
-    cap_eol_BEV_base_SSP2 = copy(empty_df)
-    cap_eol_BEV_base_SSP1 = copy(empty_df)
-    cap_eol_BEV_RCP26_SSP2 = copy(empty_df)
-    cap_eol_BEV_RCP26_SSP1 = copy(empty_df)
-    cap_eol_BEV_base_LED = copy(empty_df)
-    cap_eol_BEV_RCP26_LED = copy(empty_df)
+    cap_eol_PHEV_base_SSP2 = empty_df.copy()
+    cap_eol_PHEV_base_SSP1 = empty_df.copy()
+    cap_eol_PHEV_RCP26_SSP2 = empty_df.copy()
+    cap_eol_PHEV_RCP26_SSP1 = empty_df.copy()
+    cap_eol_PHEV_base_LED = empty_df.copy()
+    cap_eol_PHEV_RCP26_LED = empty_df.copy()
+
+    cap_eol_BEV_base_SSP2 = empty_df.copy()
+    cap_eol_BEV_base_SSP1 = empty_df.copy()
+    cap_eol_BEV_RCP26_SSP2 = empty_df.copy()
+    cap_eol_BEV_RCP26_SSP1 = empty_df.copy()
+    cap_eol_BEV_base_LED = empty_df.copy()
+    cap_eol_BEV_RCP26_LED = empty_df.copy()
 
     for col in cap_eol_PHEV_base_SSP2.columns:
         cap_eol_PHEV_base_SSP2[col].values[:] = 0
@@ -338,7 +340,7 @@ def data_read_manipulation():
         cap_eol_BEV_base_LED[col].values[:] = 0
         cap_eol_BEV_RCP26_LED[col].values[:] = 0
 
-    capacity_BEV_eol_array = [
+    capacity_BEV_eol_list = [
         cap_eol_BEV_base_SSP2,
         cap_eol_BEV_base_SSP1,
         cap_eol_BEV_RCP26_SSP2,
@@ -347,7 +349,7 @@ def data_read_manipulation():
         cap_eol_BEV_RCP26_LED
         ]
 
-    capacity_PHEV_eol_array = [
+    capacity_PHEV_eol_list = [
         cap_eol_PHEV_base_SSP2,
         cap_eol_PHEV_base_SSP1,
         cap_eol_PHEV_RCP26_SSP2,
@@ -356,20 +358,33 @@ def data_read_manipulation():
         cap_eol_PHEV_RCP26_LED
         ]
 
-    eol_base_BEV = [None]*len(capacity_PHEV_eol_array)
-    eol_base_PHEV = [None]*len(capacity_PHEV_eol_array)
+    eol_base_BEV = [None]*len(capacity_PHEV_eol_list)
+    eol_base_PHEV = [None]*len(capacity_PHEV_eol_list)
 
-    for i in range(len(capacity_BEV_eol_array)):
+    for i in range(len(capacity_BEV_eol_list)):
         for n in range(len(years_index)):
-            eol_base_BEV[i] =  calculate_eol(chem_index, years_index, years_index[n], probability, BEV_capacity_additions_yearly_array[i])
-            capacity_BEV_eol_array[i] = capacity_BEV_eol_array[i].add(eol_base_BEV[i], fill_value = 0)
-            eol_base_PHEV[i] = calculate_eol(chem_index, years_index, years_index[n], probability, PHEV_capacity_additions_yearly_array[i])
-            capacity_BEV_eol_array[i] = capacity_BEV_eol_array[i].add(eol_base_PHEV[i], fill_value = 0) 
+            eol_base_BEV[i] =  calculate_eol(chem_index, years_index, years_index[n], probability, BEV_capacity_additions_yearly_list[i])
+            capacity_BEV_eol_list[i] = capacity_BEV_eol_list[i].add(eol_base_BEV[i], fill_value = 0)
+            eol_base_PHEV[i] = calculate_eol(chem_index, years_index, years_index[n], probability, PHEV_capacity_additions_yearly_list[i])
+            capacity_BEV_eol_list[i] = capacity_BEV_eol_list[i].add(eol_base_PHEV[i], fill_value = 0) 
         
-    return capacity_BEV_eol_array[2][2060].div(1e9).sum(axis = 0)
 
+########################## Calculate retired capacity (in kg) #######################################
+
+    material_BEV_eol_list = capacity_BEV_eol_list.copy()
+    material_PHEV_eol_list = capacity_PHEV_eol_list.copy()
+
+    for i in range(len(material_BEV_eol_list)):
+        material_BEV_eol_list[i] = material_BEV_eol_list[i].reindex(segments_chemistries_materials_index)
+        material_PHEV_eol_list[i] = material_PHEV_eol_list[i].reindex(segments_chemistries_materials_index)    
+
+        #material_BEV_eol_list[i] = material_content_BEV.values * material_BEV_eol_list[i]
+        #material_PHEV_eol_list[i] = material_content_PHEV.values * material_PHEV_eol_list[i]
+
+    
 
 # %%
 data_read_manipulation()
+
 
 # %%
