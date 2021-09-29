@@ -309,19 +309,19 @@ def data_read_manipulation():
     empty_df = calculate_eol(chem_index, years_index, 2015, probability, BEV_capacity_additions_yearly_array[0])
 
 
-    cap_eol_PHEV_base_SSP2 = empty_df
-    cap_eol_PHEV_base_SSP1 = empty_df
-    cap_eol_PHEV_RCP26_SSP2 = empty_df
-    cap_eol_PHEV_RCP26_SSP1 = empty_df
-    cap_eol_PHEV_base_LED = empty_df
-    cap_eol_PHEV_RCP26_LED = empty_df
+    cap_eol_PHEV_base_SSP2 = copy(empty_df)
+    cap_eol_PHEV_base_SSP1 = copy(empty_df)
+    cap_eol_PHEV_RCP26_SSP2 = copy(empty_df)
+    cap_eol_PHEV_RCP26_SSP1 = copy(empty_df)
+    cap_eol_PHEV_base_LED = copy(empty_df)
+    cap_eol_PHEV_RCP26_LED = copy(empty_df)
 
-    cap_eol_BEV_base_SSP2 = empty_df
-    cap_eol_BEV_base_SSP1 = empty_df
-    cap_eol_BEV_RCP26_SSP2 = empty_df
-    cap_eol_BEV_RCP26_SSP1 = empty_df
-    cap_eol_BEV_base_LED = empty_df
-    cap_eol_BEV_RCP26_LED = empty_df
+    cap_eol_BEV_base_SSP2 = copy(empty_df)
+    cap_eol_BEV_base_SSP1 = copy(empty_df)
+    cap_eol_BEV_RCP26_SSP2 = copy(empty_df)
+    cap_eol_BEV_RCP26_SSP1 = copy(empty_df)
+    cap_eol_BEV_base_LED = copy(empty_df)
+    cap_eol_BEV_RCP26_LED = copy(empty_df)
 
     for col in cap_eol_PHEV_base_SSP2.columns:
         cap_eol_PHEV_base_SSP2[col].values[:] = 0
@@ -356,33 +356,18 @@ def data_read_manipulation():
         cap_eol_PHEV_RCP26_LED
         ]
 
-    total_eol_BEV_cap = [None]*len(capacity_PHEV_eol_array)
-    total_eol_PHEV_cap = [None]*len(capacity_PHEV_eol_array)
+    eol_base_BEV = [None]*len(capacity_PHEV_eol_array)
+    eol_base_PHEV = [None]*len(capacity_PHEV_eol_array)
 
-    for n in range(len(years_index)):
-        for i in range(len(capacity_BEV_eol_array)):
-            capacity_BEV_eol_array[i] = calculate_eol( 
-                chem_index,
-                years_index,
-                years_index[n], 
-                probability,
-                capacity_BEV_eol_array[i]
-                )
-                    
-            capacity_PHEV_eol_array[i] = calculate_eol( 
-                chem_index,
-                years_index,
-                years_index[n], 
-                probability,
-                capacity_PHEV_eol_array[i]
-                )
-            
-            total_eol_BEV_cap[i] = capacity_BEV_eol_array[i].add(capacity_BEV_eol_array[i], fill_value = 0)
-            total_eol_PHEV_cap[i] = capacity_PHEV_eol_array[i].add(capacity_PHEV_eol_array[i], fill_value = 0)
+    for i in range(len(capacity_BEV_eol_array)):
+        for n in range(len(years_index)):
+            eol_base_BEV[i] =  calculate_eol(chem_index, years_index, years_index[n], probability, BEV_capacity_additions_yearly_array[i])
+            capacity_BEV_eol_array[i] = capacity_BEV_eol_array[i].add(eol_base_BEV[i], fill_value = 0)
+            eol_base_PHEV[i] = calculate_eol(chem_index, years_index, years_index[n], probability, PHEV_capacity_additions_yearly_array[i])
+            capacity_BEV_eol_array[i] = capacity_BEV_eol_array[i].add(eol_base_PHEV[i], fill_value = 0) 
         
+    return capacity_BEV_eol_array[2][2060].div(1e9).sum(axis = 0)
 
-
-    return total_eol_BEV_cap
 
 # %%
 data_read_manipulation()
