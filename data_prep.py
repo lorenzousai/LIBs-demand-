@@ -358,15 +358,15 @@ def data_read_manipulation():
         cap_eol_PHEV_RCP26_LED
         ]
 
-    eol_base_BEV = [None]*len(capacity_PHEV_eol_list)
-    eol_base_PHEV = [None]*len(capacity_PHEV_eol_list)
+    eol_BEV_int = [None]*len(capacity_PHEV_eol_list)
+    eol_PHEV_int = [None]*len(capacity_PHEV_eol_list)
 
     for i in range(len(capacity_BEV_eol_list)):
         for n in range(len(years_index)):
-            eol_base_BEV[i] =  calculate_eol(chem_index, years_index, years_index[n], probability, BEV_capacity_additions_yearly_list[i])
-            capacity_BEV_eol_list[i] = capacity_BEV_eol_list[i].add(eol_base_BEV[i], fill_value = 0)
-            eol_base_PHEV[i] = calculate_eol(chem_index, years_index, years_index[n], probability, PHEV_capacity_additions_yearly_list[i])
-            capacity_PHEV_eol_list[i] = capacity_PHEV_eol_list[i].add(eol_base_PHEV[i], fill_value = 0) 
+            eol_BEV_int[i] =  calculate_eol(chem_index, years_index, years_index[n], probability, BEV_capacity_additions_yearly_list[i])
+            capacity_BEV_eol_list[i] = capacity_BEV_eol_list[i].add(eol_BEV_int[i], fill_value = 0)
+            eol_PHEV_int[i] = calculate_eol(chem_index, years_index, years_index[n], probability, PHEV_capacity_additions_yearly_list[i])
+            capacity_PHEV_eol_list[i] = capacity_PHEV_eol_list[i].add(eol_PHEV_int[i], fill_value = 0) 
         
 
 ########################## Calculate retired capacity (in kg) #######################################
@@ -387,7 +387,9 @@ def data_read_manipulation():
         material_BEV_eol_list[i] = materials_rep_BEV_eol.values * material_BEV_eol_list[i]
         material_PHEV_eol_list[i] = materials_rep_PHEV_eol.values * material_PHEV_eol_list[i]
 
-    
+    ####################################### SECTION END ##############################################
+
+
 
 # %%
 data_read_manipulation()
