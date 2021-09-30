@@ -1,4 +1,5 @@
 # %%
+from itertools import groupby
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import numpy as np
@@ -415,10 +416,6 @@ def data_read_manipulation():
     material_total_inflows = [None]*len(BEV_material_additions_yearly_list)
     material_total_outflows = [None]*len(BEV_material_additions_yearly_list)
     
-    
-    
-    
-
     for i in range(len(BEV_material_additions_yearly_list)):
         
         material_total_inflows[i] = BEV_material_additions_yearly_list[i].groupby('material').sum().copy() + PHEV_material_additions_yearly_list[i].groupby('material').sum().copy()
@@ -432,13 +429,68 @@ def data_read_manipulation():
         
         material_total_outflows[i].loc['Al'] = (material_total_outflows[i].loc['Al']) + (material_total_outflows[i].loc['Al_pack'])
 
+        # * Remove old data to avoid double counting
         material_total_inflows[i] = material_total_inflows[i].drop(['Al_pack','Cu_pack'], axis = 0)
         material_total_outflows[i] = material_total_outflows[i].drop(['Al_pack','Cu_pack'], axis = 0)
 
+    ####################################### Calculate employment and CAPEX ##############################################
 
+    # * Read data from excel file. 
+    # * employment_gwh --> employees needed per GWh or production capacity installed. 
+    # * Assumed to be 120 employees/Gwh
 
-    return material_total_inflows[0]
+    # * Employment loss --> decrease in employment demand (as a % of the total demand) as a results of 
+    # * optimization of production lines and automation
+
+    # * Start with employment  
+    employment_gwh = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Employment and automation', 
+                        skiprows = 1, nrows = 1, usecols = 'B:AO')
+    employment_loss = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Employment and automation', 
+                        skiprows = 22, nrows = 1, usecols = 'B:AO')
+
+    employment_loss = employment_loss.interpolate(method = 'linear', axis = 1)
+
+    employment_generated_yearly_list = [None]*len(BEV_material_additions_yearly_list)
+    total_capacity_addition = [None]*len(BEV_material_additions_yearly_list)
+    cumulative_capacity = [None]*len(BEV_material_additions_yearly_list)
+
+    for i in range(len(employment_generated_yearly_list)):
+        
+        total_capacity_addition[i] = (
+                BEV_capacity_additions_yearly_list[i].copy() + 
+                PHEV_capacity_additions_yearly_list[i].copy() 
+            )
+
+        employment_generated_yearly_list[i] = (
+                total_capacity_addition[i]
+                .copy()
+                .groupby('chemistry').sum()
+                .sum(axis = 0)
+                .divide(1e6)
+                .diff()
+            )
+
+        employment_with_loss = employment_loss.mul(employment_gwh)
+        employment_generated_yearly_list[i] = employment_generated_yearly_list[i].mul(employment_with_loss)
+        employment_generated_yearly_list[i] = employment_generated_yearly_list[i].loc[:,2020:2050]
+
+    # * Now the CAPEX
+        cumulative_capacity[i] = (
+            total_capacity_addition[i]
+            .copy()
+            .groupby('chemistry')
+            .sum()
+            .sum(axis = 0)
+            .cumsum()
+            .copy()
+            )
+
+    CAPEX_scenarios_list = [None]*len(BEV_material_additions_yearly_list)
+
     
+
+    return 
+
     # %%
 data_read_manipulation()
 
