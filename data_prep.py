@@ -341,21 +341,21 @@ def data_read_manipulation():
         cap_eol_BEV_RCP26_LED[col].values[:] = 0
 
     capacity_BEV_eol_list = [
-        cap_eol_BEV_base_SSP2,
-        cap_eol_BEV_base_SSP1,
         cap_eol_BEV_RCP26_SSP2,
         cap_eol_BEV_RCP26_SSP1,
-        cap_eol_BEV_base_LED,
-        cap_eol_BEV_RCP26_LED
+        cap_eol_BEV_RCP26_LED,
+        cap_eol_BEV_base_SSP2,
+        cap_eol_BEV_base_SSP1,
+        cap_eol_BEV_base_LED
         ]
 
     capacity_PHEV_eol_list = [
-        cap_eol_PHEV_base_SSP2,
-        cap_eol_PHEV_base_SSP1,
         cap_eol_PHEV_RCP26_SSP2,
         cap_eol_PHEV_RCP26_SSP1,
+        cap_eol_PHEV_RCP26_LED,
+        cap_eol_PHEV_base_SSP2,
+        cap_eol_PHEV_base_SSP1,
         cap_eol_PHEV_base_LED,
-        cap_eol_PHEV_RCP26_LED
         ]
 
     eol_BEV_int = [None]*len(capacity_PHEV_eol_list)
@@ -387,12 +387,84 @@ def data_read_manipulation():
         material_BEV_eol_list[i] = materials_rep_BEV_eol.values * material_BEV_eol_list[i]
         material_PHEV_eol_list[i] = materials_rep_PHEV_eol.values * material_PHEV_eol_list[i]
 
+        material_BEV_eol_list[i] = (
+                material_BEV_eol_list[i]
+                .reset_index()
+                .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
+                .set_index(['segment','chemistry','material'])
+            )
+
+        material_PHEV_eol_list[i] = (
+                material_PHEV_eol_list[i]
+                .reset_index()
+                .rename(columns={'level_0': 'segment', 'level_1': 'chemistry', 'level_2': 'material' }) 
+                .set_index(['segment','chemistry','material'])
+            )
+
+
+
     ####################################### SECTION END ##############################################
+    a = BEV_material_additions_yearly_list[0].head(10).copy()
+
+    # * Clean up data by for materials inflows and outflows by merging Cu and Al flows 
+    # * Originally, Cu and Al are split in Al and Cu at a cell level and Al and Cu at a pack level
+    # * Now Al and Cu are merged
+    # * In addition, the additions of BEV and PHEVs are joined in one unique list of dataframes. Same for the retired flows
+
+    # * Dataframes to work on: 
+    material_total_inflows = [None]*len(BEV_material_additions_yearly_list)
+    material_total_outflows = [None]*len(BEV_material_additions_yearly_list)
+
+    material_total_inflows = BEV_material_additions_yearly_list.copy() + PHEV_material_additions_yearly_list.copy()
+    material_total_inflows = material_BEV_eol_list.copy() + material_PHEV_eol_list.copy()
+
+    for i in range(len(BEV_material_additions_yearly_list)):
+        BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu'] = (
+            (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu']) + (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu_pack']))
+
+        BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al'] = (
+            (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al']) + (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al_pack'])) 
+
+        PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu'] = (
+            (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu']) + (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu_pack']))
+
+        PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al'] = (
+            (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al']) + (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al_pack']))
+
+        material_BEV_eol_list[i].groupby('material').sum().loc['Cu'] = (
+            (material_BEV_eol_list[i].groupby('material').sum().loc['Cu']) + (material_BEV_eol_list[i].groupby('material').sum().loc['Cu_pack']))
+        
+        material_BEV_eol_list[i].groupby('material').sum().loc['Al'] = (
+            (material_BEV_eol_list[i].groupby('material').sum().loc['Al']) + (material_BEV_eol_list[i].groupby('material').sum().loc['Al_pack']))
+
+        material_PHEV_eol_list[i].groupby('material').sum().loc['Cu'] = (
+            (material_PHEV_eol_list[i].groupby('material').sum().loc['Cu']) + (material_PHEV_eol_list[i].groupby('material').sum().loc['Cu_pack'])) 
+
+        material_PHEV_eol_list[i].groupby('material').sum().loc['Al'] = (
+            (material_PHEV_eol_list[i].groupby('material').sum().loc['Al']) + (material_PHEV_eol_list[i].groupby('material').sum().loc['Al_pack']))
 
 
+        #BEV_material_additions_yearly_list[i].groupby('material').sum() = BEV_material_additions_yearly_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
+        #PHEV_material_additions_yearly_list[i] = PHEV_material_additions_yearly_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
+
+        #material_BEV_eol_list[i] = material_BEV_eol_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
+        #material_PHEV_eol_list[i] = material_PHEV_eol_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
+
+
+
+    return material_BEV_eol_list[0][2060].div(1e9).sum(axis = 0)
 
 # %%
 data_read_manipulation()
 
 
 # %%
+if __name__ == '__main__':
+    data_read_manipulation()
+
+
+    for i in range(len(BEV_material_additions_yearly_list)):
+        BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu'] = 
+            (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu']) + (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu_pack']) 
+
+        
