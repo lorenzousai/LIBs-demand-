@@ -414,47 +414,32 @@ def data_read_manipulation():
     # * Dataframes to work on: 
     material_total_inflows = [None]*len(BEV_material_additions_yearly_list)
     material_total_outflows = [None]*len(BEV_material_additions_yearly_list)
-
-    material_total_inflows = BEV_material_additions_yearly_list.copy() + PHEV_material_additions_yearly_list.copy()
-    material_total_inflows = material_BEV_eol_list.copy() + material_PHEV_eol_list.copy()
+    
+    
+    
+    
 
     for i in range(len(BEV_material_additions_yearly_list)):
-        BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu'] = (
-            (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu']) + (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu_pack']))
-
-        BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al'] = (
-            (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al']) + (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al_pack'])) 
-
-        PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu'] = (
-            (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu']) + (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu_pack']))
-
-        PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al'] = (
-            (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al']) + (PHEV_material_additions_yearly_list[i].groupby('material').sum().loc['Al_pack']))
-
-        material_BEV_eol_list[i].groupby('material').sum().loc['Cu'] = (
-            (material_BEV_eol_list[i].groupby('material').sum().loc['Cu']) + (material_BEV_eol_list[i].groupby('material').sum().loc['Cu_pack']))
         
-        material_BEV_eol_list[i].groupby('material').sum().loc['Al'] = (
-            (material_BEV_eol_list[i].groupby('material').sum().loc['Al']) + (material_BEV_eol_list[i].groupby('material').sum().loc['Al_pack']))
+        material_total_inflows[i] = BEV_material_additions_yearly_list[i].groupby('material').sum().copy() + PHEV_material_additions_yearly_list[i].groupby('material').sum().copy()
+        material_total_outflows[i] = material_BEV_eol_list[i].groupby('material').sum().copy() + material_PHEV_eol_list[i].groupby('material').sum().copy()
+    
+        material_total_inflows[i].loc['Cu'] = (material_total_inflows[i].loc['Cu']) + (material_total_inflows[i].loc['Cu_pack'])
 
-        material_PHEV_eol_list[i].groupby('material').sum().loc['Cu'] = (
-            (material_PHEV_eol_list[i].groupby('material').sum().loc['Cu']) + (material_PHEV_eol_list[i].groupby('material').sum().loc['Cu_pack'])) 
+        material_total_inflows[i].loc['Al'] = (material_total_inflows[i].loc['Al']) + (material_total_inflows[i].loc['Al_pack'])
 
-        material_PHEV_eol_list[i].groupby('material').sum().loc['Al'] = (
-            (material_PHEV_eol_list[i].groupby('material').sum().loc['Al']) + (material_PHEV_eol_list[i].groupby('material').sum().loc['Al_pack']))
+        material_total_outflows[i].loc['Cu'] = (material_total_outflows[i].loc['Cu']) + (material_total_outflows[i].loc['Cu_pack'])
+        
+        material_total_outflows[i].loc['Al'] = (material_total_outflows[i].loc['Al']) + (material_total_outflows[i].loc['Al_pack'])
 
-
-        #BEV_material_additions_yearly_list[i].groupby('material').sum() = BEV_material_additions_yearly_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
-        #PHEV_material_additions_yearly_list[i] = PHEV_material_additions_yearly_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
-
-        #material_BEV_eol_list[i] = material_BEV_eol_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
-        #material_PHEV_eol_list[i] = material_PHEV_eol_list[i].drop(['Al_pack','Cu_pack'], axis = 0)
+        material_total_inflows[i] = material_total_inflows[i].drop(['Al_pack','Cu_pack'], axis = 0)
+        material_total_outflows[i] = material_total_outflows[i].drop(['Al_pack','Cu_pack'], axis = 0)
 
 
 
-    return material_BEV_eol_list[0][2060].div(1e9).sum(axis = 0)
-
-# %%
+    return material_total_inflows[0]
+    
+    # %%
 data_read_manipulation()
 
 
@@ -462,9 +447,3 @@ data_read_manipulation()
 if __name__ == '__main__':
     data_read_manipulation()
 
-
-    for i in range(len(BEV_material_additions_yearly_list)):
-        BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu'] = 
-            (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu']) + (BEV_material_additions_yearly_list[i].groupby('material').sum().loc['Cu_pack']) 
-
-        
