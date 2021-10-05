@@ -488,6 +488,7 @@ def data_read_manipulation():
     CAPEX_scenarios_list = [None]*len(BEV_material_additions_yearly_list)
 
     
+    
 
     return 
 
