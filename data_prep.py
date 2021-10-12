@@ -3,10 +3,10 @@ from itertools import groupby
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 import numpy as np
-import math
+import pickle
 import pandas as pd
 from scipy.interpolate import make_interp_spline, BSpline
-import copy
+import os
 
 
 # %%
@@ -43,7 +43,6 @@ def stock_additions_segmented (share_segments, raw_vehicle_stock):
     
     stock_segmented = share_segments.dot(raw_vehicle_stock)
     return(stock_segmented)
-
 
 def calculate_eol(index, years_list, start_year, prob_data, stock_add_df):
    
@@ -505,12 +504,31 @@ def data_read_manipulation():
 
 ####################################### Export data ##############################################
 
-    
+#* Employment 
+    with open('Dat_Figures//employment.pkl','wb') as f:
+        pickle.dump(employment_generated_yearly_list,f)
 
-    
+#* CAPEX
+    with open('Dat_Figures//employment.pkl','wb') as f:
+        pickle.dump(employment_generated_yearly_list,f)
 
+#* Material additions
+    with open('Dat_Figures//employment.pkl','wb') as f:
+        pickle.dump(employment_generated_yearly_list,f)
 
-    return historical_figure[10]
+#* Material outflows
+    with open('Dat_Figures//employment.pkl','wb') as f:
+        pickle.dump(employment_generated_yearly_list,f)
+
+#* Capacity additions
+    with open('Dat_Figures//employment.pkl','wb') as f:
+        pickle.dump(employment_generated_yearly_list,f)
+
+#* Capacity outflows
+    with open('Dat_Figures//employment.pkl','wb') as f:
+        pickle.dump(employment_generated_yearly_list,f)
+
+    return
     # %%
 data_read_manipulation()
 
