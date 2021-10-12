@@ -369,6 +369,22 @@ def data_read_manipulation():
             capacity_PHEV_eol_list[i] = capacity_PHEV_eol_list[i].add(eol_PHEV_int[i], fill_value = 0) 
         
 
+    total_capacity_addition = [None]*len(BEV_material_additions_yearly_list)
+    total_capacity_outflows = [None]*len(BEV_material_additions_yearly_list)
+
+    for i in range(len(BEV_capacity_additions_yearly_list)):
+        total_capacity_addition[i] = (
+                BEV_capacity_additions_yearly_list[i].copy() + 
+                PHEV_capacity_additions_yearly_list[i].copy() 
+            )
+
+        total_capacity_outflows[i] = (
+                capacity_BEV_eol_list[i].copy() + 
+                capacity_PHEV_eol_list[i].copy() 
+            )
+
+
+
 ########################## Calculate retired capacity (in kg) #######################################
 
     material_BEV_eol_list = capacity_BEV_eol_list.copy()
@@ -404,7 +420,6 @@ def data_read_manipulation():
 
 
     ####################################### SECTION END ##############################################
-    a = BEV_material_additions_yearly_list[0].head(10).copy()
 
     # * Clean up data by for materials inflows and outflows by merging Cu and Al flows 
     # * Originally, Cu and Al are split in Al and Cu at a cell level and Al and Cu at a pack level
@@ -450,15 +465,9 @@ def data_read_manipulation():
     employment_loss = employment_loss.interpolate(method = 'linear', axis = 1)
 
     employment_generated_yearly_list = [None]*len(BEV_material_additions_yearly_list)
-    total_capacity_addition = [None]*len(BEV_material_additions_yearly_list)
     cumulative_capacity = [None]*len(BEV_material_additions_yearly_list)
 
     for i in range(len(employment_generated_yearly_list)):
-        
-        total_capacity_addition[i] = (
-                BEV_capacity_additions_yearly_list[i].copy() + 
-                PHEV_capacity_additions_yearly_list[i].copy() 
-            )
 
         employment_generated_yearly_list[i] = (
                 total_capacity_addition[i]
@@ -509,24 +518,24 @@ def data_read_manipulation():
         pickle.dump(employment_generated_yearly_list,f)
 
 #* CAPEX
-    with open('Dat_Figures//employment.pkl','wb') as f:
-        pickle.dump(employment_generated_yearly_list,f)
+    with open('Dat_Figures//CAPEX.pkl','wb') as f:
+        pickle.dump(CAPEX_scenarios_list,f)
 
 #* Material additions
-    with open('Dat_Figures//employment.pkl','wb') as f:
-        pickle.dump(employment_generated_yearly_list,f)
+    with open('Dat_Figures//material_additions.pkl','wb') as f:
+        pickle.dump(material_total_inflows,f)
 
 #* Material outflows
-    with open('Dat_Figures//employment.pkl','wb') as f:
-        pickle.dump(employment_generated_yearly_list,f)
+    with open('Dat_Figures//material_outflows.pkl','wb') as f:
+        pickle.dump(material_total_outflows,f)
 
 #* Capacity additions
-    with open('Dat_Figures//employment.pkl','wb') as f:
-        pickle.dump(employment_generated_yearly_list,f)
+    with open('Dat_Figures//capacity_additions.pkl','wb') as f:
+        pickle.dump(total_capacity_addition,f)
 
 #* Capacity outflows
-    with open('Dat_Figures//employment.pkl','wb') as f:
-        pickle.dump(employment_generated_yearly_list,f)
+    with open('Dat_Figures//capacity_outflows.pkl','wb') as f:
+        pickle.dump(total_capacity_outflows,f)
 
     return
     # %%
