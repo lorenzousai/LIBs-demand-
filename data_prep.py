@@ -158,6 +158,11 @@ def data_read_manipulation():
     chemistries = chemistries.set_index(['chemistry'])
     chemistries = chemistries.interpolate(method = 'linear',  axis = 1)
 
+    #* Export chemistries data
+    with open('Dat_Figures//chemistries.pkl','wb') as f:
+        pickle.dump(chemistries,f)
+
+
     ### Read average battery size in each segment and forecasts for future battery size for BEV
     # * Interpolate battery size for missing years
     batt_size_BEV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Batt_size', skiprows=2, nrows = 7, usecols = 'C:AW')
@@ -538,8 +543,6 @@ def data_read_manipulation():
         pickle.dump(total_capacity_outflows,f)
 
     return
-    # %%
-data_read_manipulation()
 
 
 # %%
