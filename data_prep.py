@@ -485,13 +485,32 @@ def data_read_manipulation():
             .copy()
             )
 
-    CAPEX_scenarios_list = [None]*len(BEV_material_additions_yearly_list)
+    CAPEX_rates = [None]*len(BEV_material_additions_yearly_list)
+    CAPEX_scenarios_list = [None]*len(BEV_material_additions_yearly_list) 
+    b = float(-0.32) #Learning rate
+    A = 140/(cumulative_capacity[1][2016]**b) #Estimate initial price for product 
+
+    for i in range(len(cumulative_capacity)):
+        CAPEX_rates[i] = cumulative_capacity[i]*0
+
+    for j in range(len(CAPEX_rates)):    
+        for i in range(len(BEV_capacity_additions_yearly_list[0][1:45].columns)):
+            index = i + 2016
+            if index <= 2060:
+                CAPEX_rates[j][index] = A * (cumulative_capacity[j][index]**b)
+            else: 
+                break
+            
+        CAPEX_scenarios_list[j] = CAPEX_rates[j].mul(total_capacity_addition[j].groupby('chemistry').sum().sum(axis = 0).divide(1e6).diff())
+
+####################################### Export data ##############################################
 
     
+
     
 
-    return 
 
+    return historical_figure[10]
     # %%
 data_read_manipulation()
 
