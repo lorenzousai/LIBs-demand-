@@ -516,6 +516,67 @@ def data_read_manipulation():
             
         CAPEX_scenarios_list[j] = CAPEX_rates[j].mul(total_capacity_addition[j].groupby('chemistry').sum().sum(axis = 0).divide(1e6).diff())
 
+####################################### Prep dataq for historical sales figure ##############################################
+
+    PCs_prod = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 5, nrows = 1, usecols = 'CY:DN')
+    smartphones_prod = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 6, nrows = 1, usecols = 'DF:DN')
+    solar_PV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 7, nrows = 1, usecols = 'CY:DN')
+    PbA_EU = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2', skiprows = 8, nrows = 1, usecols = 'CY:DN')
+    LIBs_CN = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 9, nrows = 1, usecols = 'CY:DN')
+
+    PCs_prod.columns = range(2000,2016)
+    solar_PV.columns = range(2000,2016)
+    smartphones_prod.columns = range(2007,2016)
+    PbA_EU.columns = range(2000,2016)
+    LIBs_CN.columns = range(2000,2016)
+
+    smartphones_prod_list = smartphones_prod.stack().droplevel(0)
+    solar_PV_list = solar_PV.stack().droplevel(0)
+    PCs_prod_list = PCs_prod.stack().droplevel(0)
+    LIBs_CN = LIBs_CN.stack().droplevel(0)
+    PbA_EU = PbA_EU.stack().droplevel(0)
+
+
+    materials_addition_historical = material_total_inflows.copy().append([
+        PCs_prod_list/1e9, 
+        smartphones_prod_list/1e9, 
+        solar_PV_list/1e9, 
+        LIBs_CN/1e9,
+        PbA_EU/1e9
+        ])
+
+    historical_cars_segments = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'BEV_data', skiprows = 71, nrows = 7, usecols = 'Q:V')
+    historical_EVs_sales = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Historical EVs sales', skiprows = 13, nrows = 2, usecols = 'L:Q')
+
+    BEV_sales_historical = pd.DataFrame(historical_EVs_sales.loc[0,:])
+    PHEV_sales_historical = pd.DataFrame(historical_EVs_sales.loc[1,:])
+
+    BEV_sales_historical = BEV_sales_historical.transpose()
+    PHEV_sales_historical = PHEV_sales_historical.transpose()
+
+    historical_cars_segments.columns = BEV_sales_historical.columns.values
+
+    historical_sales_segmented = [BEV_sales_historical.round(), PHEV_sales_historical.round()]
+    historical_segments = historical_cars_segments.round(decimals=3)
+
+    for i in range(2):
+        historical_sales_segmented[i] = pd.concat([historical_sales_segmented[i]]*len(historical_segments.index))
+        historical_sales_segmented[i] = historical_sales_segmented[i].set_index(historical_segments.index)
+        historical_sales_segmented[i] = historical_sales_segmented[i].mul(historical_segments)
+        historical_sales_segmented[i] = historical_sales_segmented[i].round()
+
+
+    chem_cut = chemistries.loc[:,chemistries.columns.isin(range(2015,2021))]
+    chem_cut = chem_cut.round(decimals = 3)
+    for i in range(len(historical_sales_segmented)):
+        historical_sales_segmented[i] = historical_sales_segmented[i].reindex(chem_index, level = 0)
+        historical_sales_segmented[i] = historical_sales_segmented[i].mul(chem_cut, level = 1)
+        historical_sales_segmented[i] = historical_sales_segmented[i].round()
+
+    
+
+
+
 ####################################### Export data ##############################################
 
 #* Employment 
