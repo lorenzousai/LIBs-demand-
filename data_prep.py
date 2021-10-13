@@ -577,7 +577,8 @@ def data_read_manipulation():
     materials_loading_historical = materials_rep.loc[:,materials_rep.columns.isin(range(2015,2021))]
 
     battery_size_BEV_hist = batt_size_BEV.loc[:, batt_size_BEV.columns.isin(range(2015,2021))]
-    battery_size_PHEV_hist = batt_size_PHEV.loc[:, batt_size_PHEV.columns.isin(range(2015,2021))]
+    battery_size_PHEV_hist = pd.concat([batt_size_PHEV]*(len(historical_segments.columns)), axis = 1)
+    battery_size_PHEV_hist.columns = [2015,2016,2017,2018,2019,2020]
 
     historical_capacity[0] = historical_sales_segmented[0].mul(battery_size_BEV_hist, level = 0)
     historical_capacity[1] = historical_sales_segmented[1].mul(battery_size_PHEV_hist, level = 0)
@@ -590,10 +591,7 @@ def data_read_manipulation():
     all_materials_historical = historical_materials[0]+historical_materials[1]
     capacity_historical = historical_capacity[0]+historical_capacity[1] 
 
-
-
 ####################################### Export data ##############################################
-
 #* Employment 
     with open('Dat_Figures//employment.pkl','wb') as f:
         pickle.dump(employment_generated_yearly_list,f)
@@ -638,10 +636,11 @@ def data_read_manipulation():
         pickle.dump(capacity_historical,f)
 
 
-    return
-
+    return 
 
 # %%
 if __name__ == '__main__':
     data_read_manipulation()
 
+
+# %%
