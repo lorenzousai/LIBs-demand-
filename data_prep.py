@@ -542,6 +542,17 @@ def data_read_manipulation():
     with open('Dat_Figures//capacity_outflows.pkl','wb') as f:
         pickle.dump(total_capacity_outflows,f)
 
+
+#* Material content battery BEVs [kg/kWh]
+    with open('Dat_Figures//material_content_BEV.pkl','wb') as f:
+        pickle.dump(material_content_BEV,f)
+
+
+#* Material content battery PHEVs [kg/kWh]
+    with open('Dat_Figures//material_content_PHEV.pkl','wb') as f:
+        pickle.dump(material_content_PhEV,f)
+
+
     return
 
 
