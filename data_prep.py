@@ -550,7 +550,7 @@ def data_read_manipulation():
 
 #* Material content battery PHEVs [kg/kWh]
     with open('Dat_Figures//material_content_PHEV.pkl','wb') as f:
-        pickle.dump(material_content_PhEV,f)
+        pickle.dump(material_content_PHEV,f)
 
 
     return
