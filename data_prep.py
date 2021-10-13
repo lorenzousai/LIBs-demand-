@@ -621,10 +621,13 @@ def data_read_manipulation():
     with open('Dat_Figures//material_content_BEV.pkl','wb') as f:
         pickle.dump(material_content_BEV,f)
 
-
 #* Material content battery PHEVs [kg/kWh]
     with open('Dat_Figures//material_content_PHEV.pkl','wb') as f:
         pickle.dump(material_content_PHEV,f)
+
+#* Historical materials inflows other industries
+    with open('Dat_Figures//materials_inflows_industries.pkl','wb') as f:
+        pickle.dump(materials_addition_historical,f)
 
 #* Material additions - Historical 
     with open('Dat_Figures//material_additions_historical.pkl','wb') as f:
