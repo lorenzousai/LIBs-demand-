@@ -537,13 +537,13 @@ def data_read_manipulation():
     PbA_EU = PbA_EU.stack().droplevel(0)
 
 
-    materials_addition_historical = material_total_inflows.copy().append([
+    materials_addition_historical = [
         PCs_prod_list/1e9, 
         smartphones_prod_list/1e9, 
         solar_PV_list/1e9, 
         LIBs_CN/1e9,
         PbA_EU/1e9
-        ])
+        ]
 
     historical_cars_segments = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'BEV_data', skiprows = 71, nrows = 7, usecols = 'Q:V')
     historical_EVs_sales = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Historical EVs sales', skiprows = 13, nrows = 2, usecols = 'L:Q')
