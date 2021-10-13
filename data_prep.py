@@ -573,7 +573,22 @@ def data_read_manipulation():
         historical_sales_segmented[i] = historical_sales_segmented[i].mul(chem_cut, level = 1)
         historical_sales_segmented[i] = historical_sales_segmented[i].round()
 
-    
+    historical_capacity = historical_sales_segmented.copy()
+    materials_loading_historical = materials_rep.loc[:,materials_rep.columns.isin(range(2015,2021))]
+
+    battery_size_BEV_hist = batt_size_BEV.loc[:, batt_size_BEV.columns.isin(range(2015,2021))]
+    battery_size_PHEV_hist = batt_size_PHEV.loc[:, batt_size_PHEV.columns.isin(range(2015,2021))]
+
+    historical_capacity[0] = historical_sales_segmented[0].mul(battery_size_BEV_hist, level = 0)
+    historical_capacity[1] = historical_sales_segmented[1].mul(battery_size_PHEV_hist, level = 0)
+
+    historical_materials = historical_capacity.copy()
+    for i in range(len(historical_materials)):
+        historical_materials[i] = historical_materials[i].reindex(segments_chemistries_materials_index)
+        historical_materials[i] = historical_materials[i].mul(materials_loading_historical, level = 2)
+
+    all_materials_historical = historical_materials[0]+historical_materials[1]
+    capacity_historical = historical_capacity[0]+historical_capacity[1] 
 
 
 
@@ -612,6 +627,15 @@ def data_read_manipulation():
 #* Material content battery PHEVs [kg/kWh]
     with open('Dat_Figures//material_content_PHEV.pkl','wb') as f:
         pickle.dump(material_content_PHEV,f)
+
+#* Material additions - Historical 
+    with open('Dat_Figures//material_additions_historical.pkl','wb') as f:
+        pickle.dump(all_materials_historical,f)
+
+
+#* Capacity additions - Historical 
+    with open('Dat_Figures//capacity_additions_historical.pkl','wb') as f:
+        pickle.dump(capacity_historical,f)
 
 
     return
