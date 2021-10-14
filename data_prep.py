@@ -516,11 +516,11 @@ def data_read_manipulation():
 
 ####################################### Prep dataq for historical sales figure ##############################################
 
-    PCs_prod = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 3, nrows = 1, usecols = 'C:R')
-    smartphones_prod = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 4, nrows = 1, usecols = 'J:R')
-    solar_PV = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 5, nrows = 1, usecols = 'C:R')
-    PbA_EU = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand', skiprows = 6, nrows = 1, usecols = 'C:R')
-    LIBs_CN = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 7, nrows = 1, usecols = 'C:R')
+    PCs_prod = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 2, nrows = 1, usecols = 'C:R')
+    smartphones_prod = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 3, nrows = 1, usecols = 'J:R')
+    solar_PV = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 4, nrows = 1, usecols = 'C:R')
+    PbA_EU = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand', skiprows = 5, nrows = 1, usecols = 'C:R')
+    LIBs_CN = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 6, nrows = 1, usecols = 'C:R')
 
     PCs_prod.columns = range(2000,2016)
     solar_PV.columns = range(2000,2016)
@@ -543,6 +543,7 @@ def data_read_manipulation():
         PbA_EU/1e9
         ]
 
+    
     historical_cars_segments = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'BEV_data', skiprows = 22, nrows = 7, usecols = 'C:H')
     historical_EVs_sales = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'BEV_data', skiprows = 36, nrows = 2, usecols = 'C:H')
 
