@@ -38,8 +38,6 @@ def stock_additions_segmented (share_segments, raw_vehicle_stock):
     raw_vehicle_stock.index = ['share']
     
     #Calculate capacity addition per year
-   # stock_addition = raw_vehicle_stock.diff(axis = 1)
-    #stock_addition[2015] = raw_vehicle_stock[2015]
     
     stock_segmented = share_segments.dot(raw_vehicle_stock)
     return(stock_segmented)
@@ -56,11 +54,11 @@ def calculate_eol(index, years_list, start_year, prob_data, stock_add_df):
     prob_data = prob_data.reindex(index, level = 0)
     prob_data.columns = pd.Index(np.arange(start_year, start_year+25))
    
-    testing_testing = pd.concat([stock_add_df[start_year]]*25, axis = 1)
+    stock_add_rep = pd.concat([stock_add_df[start_year]]*25, axis = 1)
     
-    testing_testing.columns = pd.Index(np.arange(start_year, start_year+25))
+    stock_add_rep.columns = pd.Index(np.arange(start_year, start_year+25))
     
-    eol = testing_testing.mul(prob_data)
+    eol = stock_add_rep.mul(prob_data)
     return(eol)
 
 def get_share(stock, BEVs, PHEVs, ICEVG, ICEVD):
@@ -76,7 +74,7 @@ def get_share(stock, BEVs, PHEVs, ICEVG, ICEVD):
 
 def data_read_manipulation():
 
-    raw_data_inflows = pd.read_excel('ODYM_RECC.xls','Model_Results')
+    raw_data_inflows = pd.read_excel('EVs_inflows_ODYM_RECC.xls','Model_Results')
     segment = ['A','B','C','D','E','F','J']
     share = ['0.08','0.2056','0.2658','0.0679','0.0287', '0.0021','0.3499']
     share = np.array(share,dtype=float)
@@ -154,7 +152,7 @@ def data_read_manipulation():
 
     
     ### Read data for chemistries market share in given years
-    chemistries = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet1', skiprows=24, nrows = 8, usecols = 'B:AV')
+    chemistries = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Chemistries_scenario', skiprows=4, nrows = 8, usecols = 'B:AV')
     chemistries = chemistries.set_index(['chemistry'])
     chemistries = chemistries.interpolate(method = 'linear',  axis = 1)
 
@@ -165,7 +163,7 @@ def data_read_manipulation():
 
     ### Read average battery size in each segment and forecasts for future battery size for BEV
     # * Interpolate battery size for missing years
-    batt_size_BEV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Batt_size', skiprows=2, nrows = 7, usecols = 'C:AW')
+    batt_size_BEV = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Battery_size', skiprows=2, nrows = 7, usecols = 'C:AW')
     batt_size_BEV = batt_size_BEV.set_index("Segment")
     batt_size_BEV = batt_size_BEV.interpolate(method = "linear", axis = 1)
     batt_size_BEV = batt_size_BEV.round()
@@ -174,14 +172,14 @@ def data_read_manipulation():
 
 
     ## Do a similar thing for PHEVs, but in this case we assume the battery size remains constant over time 
-    batt_size_PHEV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'BEV_data', skiprows=20, nrows = 7, usecols = 'B:C')
+    batt_size_PHEV = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Battery_size', skiprows=13, nrows = 7, usecols = 'C:D')
     batt_size_PHEV = batt_size_PHEV.set_index("Segment")
     batt_size_PHEV = batt_size_PHEV.reset_index()
     batt_size_PHEV.drop('Segment', inplace = True, axis = 1)
     batt_size_PHEV.columns = [2015]
     
     ### Read material loading in kg/kwh for each chemistry analysed and prepare df
-    material = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Material composition', skiprows=1, nrows = 8, usecols = 'B:M')
+    material = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Material composition', skiprows=1, nrows = 8, usecols = 'B:M')
     material = material.set_index(['chemistry'])
     
 
@@ -462,10 +460,10 @@ def data_read_manipulation():
     # * optimization of production lines and automation
 
     # * Start with employment  
-    employment_gwh = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Employment and automation', 
+    employment_gwh = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Employment and automation', 
                         skiprows = 1, nrows = 1, usecols = 'B:AO')
-    employment_loss = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Employment and automation', 
-                        skiprows = 22, nrows = 1, usecols = 'B:AO')
+    employment_loss = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Employment and automation', 
+                        skiprows = 5, nrows = 1, usecols = 'B:AO')
 
     employment_loss = employment_loss.interpolate(method = 'linear', axis = 1)
 
@@ -518,11 +516,11 @@ def data_read_manipulation():
 
 ####################################### Prep dataq for historical sales figure ##############################################
 
-    PCs_prod = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 5, nrows = 1, usecols = 'CY:DN')
-    smartphones_prod = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 6, nrows = 1, usecols = 'DF:DN')
-    solar_PV = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 7, nrows = 1, usecols = 'CY:DN')
-    PbA_EU = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2', skiprows = 8, nrows = 1, usecols = 'CY:DN')
-    LIBs_CN = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Sheet2',skiprows = 9, nrows = 1, usecols = 'CY:DN')
+    PCs_prod = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 3, nrows = 1, usecols = 'C:R')
+    smartphones_prod = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 4, nrows = 1, usecols = 'J:R')
+    solar_PV = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 5, nrows = 1, usecols = 'C:R')
+    PbA_EU = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand', skiprows = 6, nrows = 1, usecols = 'C:R')
+    LIBs_CN = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'Other_industries_mat demand',skiprows = 7, nrows = 1, usecols = 'C:R')
 
     PCs_prod.columns = range(2000,2016)
     solar_PV.columns = range(2000,2016)
@@ -545,8 +543,8 @@ def data_read_manipulation():
         PbA_EU/1e9
         ]
 
-    historical_cars_segments = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'BEV_data', skiprows = 71, nrows = 7, usecols = 'Q:V')
-    historical_EVs_sales = pd.read_excel('Test_chemistries.xlsx', sheet_name = 'Historical EVs sales', skiprows = 13, nrows = 2, usecols = 'L:Q')
+    historical_cars_segments = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'BEV_data', skiprows = 22, nrows = 7, usecols = 'C:H')
+    historical_EVs_sales = pd.read_excel('BEVs_LIB_CAPEX_employment stats.xlsx', sheet_name = 'BEV_data', skiprows = 36, nrows = 2, usecols = 'C:H')
 
     BEV_sales_historical = pd.DataFrame(historical_EVs_sales.loc[0,:])
     PHEV_sales_historical = pd.DataFrame(historical_EVs_sales.loc[1,:])
