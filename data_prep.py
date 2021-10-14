@@ -157,7 +157,7 @@ def data_read_manipulation():
     chemistries = chemistries.interpolate(method = 'linear',  axis = 1)
 
     #* Export chemistries data
-    with open('Dat_Figures//chemistries.pkl','wb') as f:
+    with open('Data_for_Figures//chemistries.pkl','wb') as f:
         pickle.dump(chemistries,f)
 
 
@@ -499,7 +499,8 @@ def data_read_manipulation():
     CAPEX_rates = [None]*len(BEV_material_additions_yearly_list)
     CAPEX_scenarios_list = [None]*len(BEV_material_additions_yearly_list) 
     b = float(-0.32) #Learning rate
-    A = 140/(cumulative_capacity[1][2016]**b) #Estimate initial price for product 
+    #A = 140/(cumulative_capacity[1][2016]**b) #Estimate initial price for product 
+    A = 140/((106874*1e3)**b) #Data on installed capacity based on https://doi.org/10.1016/j.susmat.2018.e00087
 
     for i in range(len(cumulative_capacity)):
         CAPEX_rates[i] = cumulative_capacity[i]*0
