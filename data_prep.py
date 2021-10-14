@@ -592,49 +592,49 @@ def data_read_manipulation():
 
 ####################################### Export data ##############################################
 #* Employment 
-    with open('Dat_Figures//employment.pkl','wb') as f:
+    with open('Data_for_Figures//employment.pkl','wb') as f:
         pickle.dump(employment_generated_yearly_list,f)
 
 #* CAPEX
-    with open('Dat_Figures//CAPEX.pkl','wb') as f:
+    with open('Data_for_Figures//CAPEX.pkl','wb') as f:
         pickle.dump(CAPEX_scenarios_list,f)
 
 #* Material additions
-    with open('Dat_Figures//material_additions.pkl','wb') as f:
+    with open('Data_for_Figures//material_additions.pkl','wb') as f:
         pickle.dump(material_total_inflows,f)
 
 #* Material outflows
-    with open('Dat_Figures//material_outflows.pkl','wb') as f:
+    with open('Data_for_Figures//material_outflows.pkl','wb') as f:
         pickle.dump(material_total_outflows,f)
 
 #* Capacity additions
-    with open('Dat_Figures//capacity_additions.pkl','wb') as f:
+    with open('Data_for_Figures//capacity_additions.pkl','wb') as f:
         pickle.dump(total_capacity_addition,f)
 
 #* Capacity outflows
-    with open('Dat_Figures//capacity_outflows.pkl','wb') as f:
+    with open('Data_for_Figures//capacity_outflows.pkl','wb') as f:
         pickle.dump(total_capacity_outflows,f)
 
 
 #* Material content battery BEVs [kg/kWh]
-    with open('Dat_Figures//material_content_BEV.pkl','wb') as f:
+    with open('Data_for_Figures//material_content_BEV.pkl','wb') as f:
         pickle.dump(material_content_BEV,f)
 
 #* Material content battery PHEVs [kg/kWh]
-    with open('Dat_Figures//material_content_PHEV.pkl','wb') as f:
+    with open('Data_for_Figures//material_content_PHEV.pkl','wb') as f:
         pickle.dump(material_content_PHEV,f)
 
 #* Historical materials inflows other industries
-    with open('Dat_Figures//materials_inflows_industries.pkl','wb') as f:
+    with open('Data_for_Figures//materials_inflows_industries.pkl','wb') as f:
         pickle.dump(materials_addition_historical,f)
 
 #* Material additions - Historical 
-    with open('Dat_Figures//material_additions_historical.pkl','wb') as f:
+    with open('Data_for_Figures//material_additions_historical.pkl','wb') as f:
         pickle.dump(all_materials_historical,f)
 
 
 #* Capacity additions - Historical 
-    with open('Dat_Figures//capacity_additions_historical.pkl','wb') as f:
+    with open('Data_for_Figures//capacity_additions_historical.pkl','wb') as f:
         pickle.dump(capacity_historical,f)
 
 
