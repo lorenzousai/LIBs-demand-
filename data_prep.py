@@ -1,13 +1,10 @@
 # %%
-from itertools import groupby
-import matplotlib.pyplot as plt
+from typing import Callable
 import scipy.stats as stats
 import numpy as np
 import pickle
 import pandas as pd
-from scipy.interpolate import make_interp_spline, BSpline
-import os
-
+from pandas import ExcelWriter
 
 # %%
 def assign_index_material (df):
@@ -23,7 +20,7 @@ def assign_index_capacity (df):
     df = df.set_index(['segment','chemistry'])
     #df = df.divide(1e6)
     return(df)
-# %%
+
 def stock_additions_segmented (share_segments, raw_vehicle_stock):
     
 # This function takes the stock in each year and calculates the stock additions for the period 2016-2060
@@ -79,7 +76,6 @@ def data_read_manipulation():
     share = ['0.08','0.2056','0.2658','0.0679','0.0287', '0.0021','0.3499']
     share = np.array(share,dtype=float)
     share_df = pd.DataFrame(share,columns=['share'])
-
 
     # * Filter data and save it in different dataframes
     # * Starting with BEVs
@@ -591,6 +587,7 @@ def data_read_manipulation():
     all_materials_historical = historical_materials[0]+historical_materials[1]
     capacity_historical = historical_capacity[0]+historical_capacity[1] 
 
+
 ####################################### Export data ##############################################
 #* Employment 
     with open('Data_for_Figures//employment.pkl','wb') as f:
@@ -639,7 +636,15 @@ def data_read_manipulation():
         pickle.dump(capacity_historical,f)
 
 
-    return 
+#    with ExcelWriter('capacity_outflows.xlsx', engine = 'xlsxwriter') as writer:
+#        for n, df in enumerate(total_capacity_outflows):
+#            df.to_excel(writer,'sheet%s' %n)
+#        writer.save()
+
+
+#    return 
+
+#data_read_manipulation()
 
 # %%
 if __name__ == '__main__':
