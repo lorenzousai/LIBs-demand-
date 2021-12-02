@@ -416,8 +416,6 @@ def data_read_manipulation():
                 .set_index(['segment','chemistry','material'])
             )
 
-
-
     ####################################### SECTION END ##############################################
 
     # * Clean up data by for materials inflows and outflows by merging Cu and Al flows 
