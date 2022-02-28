@@ -1,5 +1,5 @@
 # LIBs-demand-
-Code for manuscript soon submitted in ERL
+Code for manuscript published in Environmental Research: Infrastructure and Sustainability.
 The code is split in 2 main parts: 
   The script "data_prep.py" is used to: 
       - Read the raw data on EVs inflows for each scenario
