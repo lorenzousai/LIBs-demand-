@@ -1,5 +1,5 @@
 # LIBs-demand-
-Code for manuscript published in Environmental Research: Infrastructure and Sustainability.
+Code for manuscript published in Environmental Research: Infrastructure and Sustainability (https://doi.org/10.1088/2634-4505/ac49a0).
 The code is split in 2 main parts: 
   The script "data_prep.py" is used to: 
       - Read the raw data on EVs inflows for each scenario
